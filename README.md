@@ -1,12 +1,16 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Open for Collaborations
 
-# Run and deploy your AI Studio app
+I am open to collaborators who would like to contribute and improve this project.
+If you are interested in working on this, please contact me and I will add you as a collaborator on GitHub.
 
-This contains everything you need to run your app locally.
+### Features I would like help with:
 
-View your app in AI Studio: https://ai.studio/apps/drive/1PxvnT5DYBl_OMhLsN4QpDs4zQ7VwzWeC
+* **High-quality PDF export** – improve the current PDF generation, which is not optimal.
+* **Offline executable (.exe) version** – package the app into a desktop application with local saving functionality.
+
+
+
+**_Please DM me if you are interested in taking this project further._**
 
 ## Run Locally
 
@@ -18,3 +22,4 @@ View your app in AI Studio: https://ai.studio/apps/drive/1PxvnT5DYBl_OMhLsN4QpDs
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
