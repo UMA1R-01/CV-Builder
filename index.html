@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Intuitive CV Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Arial&family=Calibri&family=Georgia&family=Helvetica&family=Lato&family=Open+Sans&family=Poppins&family=Roboto&family=Source+Sans+Pro&family=Source+Code+Pro&family=Times+New+Roman&display=swap" rel="stylesheet">
+    <style>
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Page-like shadow for the CV preview */
+        .cv-page-shadow {
+            box-shadow: 0 0 0.5cm rgba(0,0,0,0.2);
+        }
+        body {
+            background-color: #f7fafc; /* A light gray background */
+        }
+        
+        /* Prose styles for rendered HTML in preview and editor */
+        .prose ul, [contenteditable] ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+        }
+        .prose ol, [contenteditable] ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+        }
+        .prose li, [contenteditable] li {
+            margin-bottom: 0.25rem;
+        }
+        .prose a {
+            text-decoration: underline;
+        }
+        /* Fix for prose text color not inheriting from parent in preview */
+        .prose, .prose p, .prose ul, .prose ol, .prose li, .prose strong, .prose em, .prose b, .prose i, .prose u {
+            color: inherit;
+        }
+        
+        /* Placeholder for contenteditable */
+        [contenteditable][data-placeholder]:empty:before {
+            content: attr(data-placeholder);
+            color: #6b7280; /* gray-500 for dark editor */
+            pointer-events: none;
+            display: block;
+        }
+        .font-mono-code {
+            font-family: 'Source Code Pro', monospace;
+        }
+
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "@dnd-kit/utilities": "https://esm.sh/@dnd-kit/utilities@^3.2.2",
+    "@dnd-kit/sortable": "https://esm.sh/@dnd-kit/sortable@^10.0.0",
+    "@dnd-kit/core": "https://esm.sh/@dnd-kit/core@^6.3.1"
+  }
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>
