@@ -100,14 +100,13 @@ interface ControlPanelProps {
     setCvName: (name: string) => void;
     onSave: () => void;
     onOpenManager: () => void;
-    onSavePdf: () => void;
-    isSavingPdf: boolean;
+    pdfLink: React.ReactNode;
     onExportHtml: () => void;
     onExportJson: () => void;
     onImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const ControlPanel: React.FC<ControlPanelProps> = ({ cvData, actions, style, setStyle, cvName, setCvName, onSave, onOpenManager, onSavePdf, isSavingPdf, onExportHtml, onExportJson, onImport }) => {
+const ControlPanel: React.FC<ControlPanelProps> = ({ cvData, actions, style, setStyle, cvName, setCvName, onSave, onOpenManager, pdfLink, onExportHtml, onExportJson, onImport }) => {
     const [activeTab, setActiveTab] = useState<'content' | 'style'>('content');
     const [expandedSection, setExpandedSection] = useState<string | null>('personal');
     const [newSectionName, setNewSectionName] = useState('');
@@ -190,13 +189,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ cvData, actions, style, set
                             <div className="pt-2 border-t">
                                 <label className="block text-sm font-medium text-gray-700 my-1">Export / Import</label>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <button
-                                        onClick={onSavePdf}
-                                        disabled={isSavingPdf}
-                                        className="bg-red-600 text-white font-semibold py-2 px-3 rounded-md hover:bg-red-700 transition-colors text-sm disabled:bg-red-400 disabled:cursor-not-allowed"
-                                    >
-                                        {isSavingPdf ? 'Saving...' : 'Save to PDF'}
-                                    </button>
+                                    {pdfLink}
                                     <button onClick={onExportHtml} className="bg-white text-gray-700 font-semibold py-2 px-3 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors text-sm">
                                         Export as HTML
                                     </button>
