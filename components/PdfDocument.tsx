@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
+import { Parser, ProcessNodeDefinitions } from 'html-to-react';
 
 // Register fonts
 Font.register({
@@ -163,10 +164,20 @@ const styles = StyleSheet.create({
   },
 });
 
-const parseHtml = (html: string) => {
-  const listItems = html.match(/<li>(.*?)<\/li>/g)?.map(item => item.replace(/<\/?li>/g, ''));
-  return listItems || [html.replace(/<\/?p>/g, '')];
-};
+const htmlToReactParser = new Parser();
+const processNodeDefinitions = new ProcessNodeDefinitions(React);
+const processingInstructions = [
+  {
+    shouldProcessNode: (node: any) => node.tagName === 'li',
+    processNode: (node: any, children: any) => {
+      return <Text>• {children}</Text>;
+    },
+  },
+  {
+    shouldProcessNode: () => true,
+    processNode: processNodeDefinitions.processDefaultNode,
+  },
+];
 
 export const PdfDocument = ({ cv, style }: any) => (
   <Document>
@@ -191,9 +202,7 @@ export const PdfDocument = ({ cv, style }: any) => (
                 <Text style={styles.entryDate}>{entry.date}</Text>
               </View>
               <Text>{entry.company}</Text>
-              {parseHtml(entry.description).map((item, j) => (
-                <Text key={j}>• {item}</Text>
-              ))}
+              {htmlToReactParser.parseWithInstructions(entry.description, () => true, processingInstructions)}
             </View>
           ))}
           {section.type === 'education' && section.entries.map((entry: any, i: number) => (
@@ -203,9 +212,7 @@ export const PdfDocument = ({ cv, style }: any) => (
                 <Text style={styles.entryDate}>{entry.date}</Text>
               </View>
               <Text>{entry.school}</Text>
-              {parseHtml(entry.description).map((item, j) => (
-                <Text key={j}>• {item}</Text>
-              ))}
+              {htmlToReactParser.parseWithInstructions(entry.description, () => true, processingInstructions)}
             </View>
           ))}
           {section.type === 'skills' && (
@@ -220,9 +227,7 @@ export const PdfDocument = ({ cv, style }: any) => (
               <View style={styles.entryHeader}>
                 <Text style={styles.entryTitle}>{entry.title}</Text>
               </View>
-              {parseHtml(entry.description).map((item, j) => (
-                <Text key={j}>• {item}</Text>
-              ))}
+              {htmlToReactParser.parseWithInstructions(entry.description, () => true, processingInstructions)}
             </View>
           ))}
           {section.type === 'custom' && section.entries.map((entry: any, i: number) => (
