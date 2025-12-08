@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useCVData } from './hooks/useCVData';
 import { CVData, CVStyle, SavedCV, WorkExperienceEntry, EducationEntry, SkillEntry, ProjectEntry, CertificationEntry, LanguageEntry, CustomEntry } from './types';
 import { CVPreview } from './components/CVPreview';
@@ -10,10 +10,112 @@ import { getSavedCVs, saveCVs, getWIPCV, saveWIPCV } from './services/cvStore';
 import { usePDF, Font } from '@react-pdf/renderer';
 import { PdfDocument } from './components/PdfDocument';
 
+// Register fonts
+Font.register({
+  family: 'Arial',
+  fonts: [
+    { src: '/fonts/arial.ttf' },
+    { src: '/fonts/arialbd.ttf', fontWeight: 'bold' },
+    { src: '/fonts/ariali.ttf', fontStyle: 'italic' },
+    { src: '/fonts/arialbi.ttf', fontWeight: 'bold', fontStyle: 'italic' },
+  ],
+});
+Font.register({
+  family: 'Calibri',
+  fonts: [
+    { src: '/fonts/calibri.ttf' },
+    { src: '/fonts/calibrib.ttf', fontWeight: 'bold' },
+    { src: '/fonts/calibrii.ttf', fontStyle: 'italic' },
+    { src: '/fonts/calibriz.ttf', fontWeight: 'bold', fontStyle: 'italic' },
+  ],
+});
+Font.register({
+  family: 'Georgia',
+  fonts: [
+    { src: '/fonts/georgia.ttf' },
+    { src: '/fonts/georgiab.ttf', fontWeight: 'bold' },
+    { src: '/fonts/georgiai.ttf', fontStyle: 'italic' },
+    { src: '/fonts/georgiaz.ttf', fontWeight: 'bold', fontStyle: 'italic' },
+  ],
+});
+Font.register({
+  family: 'Helvetica',
+  fonts: [
+    { src: '/fonts/helvetica.ttf' },
+    { src: '/fonts/helveticab.ttf', fontWeight: 'bold' },
+    { src: '/fonts/helveticai.ttf', fontStyle: 'italic' },
+            { src: '/fonts/helveticabi.ttf', fontWeight: 'bold', fontStyle: 'italic' },
+  ],
+});
+Font.register({
+  family: 'Lato',
+  fonts: [
+    { src: '/fonts/Lato-Regular.ttf' },
+    { src: '/fonts/Lato-Bold.ttf', fontWeight: 'bold' },
+    { src: '/fonts/Lato-Italic.ttf', fontStyle: 'italic' },
+    { src: '/fonts/Lato-BoldItalic.ttf', fontWeight: 'bold', fontStyle: 'italic' },
+  ],
+});
+Font.register({
+  family: 'Open Sans',
+  fonts: [
+    { src: '/fonts/OpenSans-Regular.ttf' },
+    { src: '/fonts/OpenSans-Bold.ttf', fontWeight: 'bold' },
+    { src: '/fonts/OpenSans-Italic.ttf', fontStyle: 'italic' },
+    { src: '/fonts/OpenSans-BoldItalic.ttf', fontWeight: 'bold', fontStyle: 'italic' },
+  ],
+});
+Font.register({
+  family: 'Poppins',
+  fonts: [
+    { src: '/fonts/Poppins-Regular.otf' },
+    { src: '/fonts/Poppins-Bold.otf', fontWeight: 'bold' },
+    { src: '/fonts/Poppins-Italic.otf', fontStyle: 'italic' },
+    { src: '/fonts/Poppins-BoldItalic.otf', fontWeight: 'bold', fontStyle: 'italic' },
+  ],
+});
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    { src: '/fonts/Roboto-Regular.ttf' },
+    { src: '/fonts/Roboto-Bold.ttf', fontWeight: 'bold' },
+    { src: '/fonts/Roboto-Italic.ttf', fontStyle: 'italic' },
+    { src: '/fonts/Roboto-BoldItalic.ttf', fontWeight: 'bold', fontStyle: 'italic' },
+  ],
+});
+Font.register({
+  family: 'Source Sans Pro',
+  fonts: [
+    { src: '/fonts/SourceSansPro-Regular.otf' },
+    { src: '/fonts/SourceSansPro-Bold.otf', fontWeight: 'bold' },
+    { src: '/fonts/SourceSansPro-It.otf', fontStyle: 'italic' },
+    { src: '/fonts/SourceSansPro-BoldIt.otf', fontWeight: 'bold', fontStyle: 'italic' },
+  ],
+});
+Font.register({
+  family: 'Source Code Pro',
+  fonts: [
+    { src: '/fonts/SourceCodePro-Regular.otf' },
+    { src: '/fonts/SourceCodePro-Bold.otf', fontWeight: 'bold' },
+    { src: '/fonts/SourceCodePro-It.otf', fontStyle: 'italic' },
+    { src: '/fonts/SourceCodePro-BoldIt.otf', fontWeight: 'bold', fontStyle: 'italic' },
+  ],
+});
+Font.register({
+  family: 'Times New Roman',
+  fonts: [
+    { src: '/fonts/times.ttf' },
+    { src: '/fonts/timesbd.ttf', fontWeight: 'bold' },
+    { src: '/fonts/timesi.ttf', fontStyle: 'italic' },
+    { src: '/fonts/timesbi.ttf', fontWeight: 'bold', fontStyle: 'italic' },
+  ],
+});
+
 const App: React.FC = () => {
     const { cvData, actions } = useCVData();
     const [style, setStyle] = useState<CVStyle>(DEFAULT_STYLE);
-    const [instance, updateInstance] = usePDF({ document: <PdfDocument cv={cvData} style={style} /> });
+    const pdfDocument = useMemo(() => <PdfDocument cv={cvData} style={style} />, [cvData, style]);
+    const [instance, updateInstance] = usePDF({ document: pdfDocument });
     const cvPreviewRef = useRef<HTMLDivElement>(null);
 
     const [savedCVs, setSavedCVs] = useState<SavedCV[]>([]);
@@ -59,109 +161,6 @@ const App: React.FC = () => {
     useEffect(() => {
         updateInstance();
     }, [cvData, style]);
-
-    useEffect(() => {
-        // Register fonts
-        Font.register({
-          family: 'Arial',
-          fonts: [
-            { src: '/fonts/arial.ttf' },
-            { src: '/fonts/arialbd.ttf', fontWeight: 'bold' },
-            { src: '/fonts/ariali.ttf', fontStyle: 'italic' },
-            { src: '/fonts/arialbi.ttf', fontWeight: 'bold', fontStyle: 'italic' },
-          ],
-        });
-        Font.register({
-          family: 'Calibri',
-          fonts: [
-            { src: '/fonts/calibri.ttf' },
-            { src: '/fonts/calibrib.ttf', fontWeight: 'bold' },
-            { src: '/fonts/calibrii.ttf', fontStyle: 'italic' },
-            { src: '/fonts/calibriz.ttf', fontWeight: 'bold', fontStyle: 'italic' },
-          ],
-        });
-        Font.register({
-          family: 'Georgia',
-          fonts: [
-            { src: '/fonts/georgia.ttf' },
-            { src: '/fonts/georgiab.ttf', fontWeight: 'bold' },
-            { src: '/fonts/georgiai.ttf', fontStyle: 'italic' },
-            { src: '/fonts/georgiaz.ttf', fontWeight: 'bold', fontStyle: 'italic' },
-          ],
-        });
-        Font.register({
-          family: 'Helvetica',
-          fonts: [
-            { src: '/fonts/helvetica.ttf' },
-            { src: '/fonts/helveticab.ttf', fontWeight: 'bold' },
-            { src: '/fonts/helveticai.ttf', fontStyle: 'italic' },
-            { src: '/fonts/helveticab.ttf', fontWeight: 'bold', fontStyle: 'italic' },
-          ],
-        });
-        Font.register({
-          family: 'Lato',
-          fonts: [
-            { src: '/fonts/Lato-Regular.ttf' },
-            { src: '/fonts/Lato-Bold.ttf', fontWeight: 'bold' },
-            { src: '/fonts/Lato-Italic.ttf', fontStyle: 'italic' },
-            { src: '/fonts/Lato-BoldItalic.ttf', fontWeight: 'bold', fontStyle: 'italic' },
-          ],
-        });
-        Font.register({
-          family: 'Open Sans',
-          fonts: [
-            { src: '/fonts/OpenSans-Regular.ttf' },
-            { src: '/fonts/OpenSans-Bold.ttf', fontWeight: 'bold' },
-            { src: '/fonts/OpenSans-Italic.ttf', fontStyle: 'italic' },
-            { src: '/fonts/OpenSans-BoldItalic.ttf', fontWeight: 'bold', fontStyle: 'italic' },
-          ],
-        });
-        Font.register({
-          family: 'Poppins',
-          fonts: [
-            { src: '/fonts/Poppins-Regular.otf' },
-            { src: '/fonts/Poppins-Bold.otf', fontWeight: 'bold' },
-            { src: '/fonts/Poppins-Italic.otf', fontStyle: 'italic' },
-            { src: '/fonts/Poppins-BoldItalic.otf', fontWeight: 'bold', fontStyle: 'italic' },
-          ],
-        });
-        Font.register({
-          family: 'Roboto',
-          fonts: [
-            { src: '/fonts/Roboto-Regular.ttf' },
-            { src: '/fonts/Roboto-Bold.ttf', fontWeight: 'bold' },
-            { src: '/fonts/Roboto-Italic.ttf', fontStyle: 'italic' },
-            { src: '/fonts/Roboto-BoldItalic.ttf', fontWeight: 'bold', fontStyle: 'italic' },
-          ],
-        });
-        Font.register({
-          family: 'Source Sans Pro',
-          fonts: [
-            { src: '/fonts/SourceSansPro-Regular.otf' },
-            { src: '/fonts/SourceSansPro-Bold.otf', fontWeight: 'bold' },
-            { src: '/fonts/SourceSansPro-It.otf', fontStyle: 'italic' },
-            { src: '/fonts/SourceSansPro-BoldIt.otf', fontWeight: 'bold', fontStyle: 'italic' },
-          ],
-        });
-        Font.register({
-          family: 'Source Code Pro',
-          fonts: [
-            { src: '/fonts/SourceCodePro-Regular.otf' },
-            { src: '/fonts/SourceCodePro-Bold.otf', fontWeight: 'bold' },
-            { src: '/fonts/SourceCodePro-It.otf', fontStyle: 'italic' },
-            { src: '/fonts/SourceCodePro-BoldIt.otf', fontWeight: 'bold', fontStyle: 'italic' },
-          ],
-        });
-        Font.register({
-          family: 'Times New Roman',
-          fonts: [
-            { src: '/fonts/times.ttf' },
-            { src: '/fonts/timesbd.ttf', fontWeight: 'bold' },
-            { src: '/fonts/timesi.ttf', fontStyle: 'italic' },
-            { src: '/fonts/timesbi.ttf', fontWeight: 'bold', fontStyle: 'italic' },
-          ],
-        });
-      }, []);
 
 
     const handleLoadCV = (id: string, cvs: SavedCV[] = savedCVs, openManager = false) => {
