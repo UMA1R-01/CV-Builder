@@ -7,12 +7,13 @@ import ControlPanel from './components/ControlPanel';
 import { CVManager } from './components/CVManager';
 import { DEFAULT_STYLE, DEFAULT_CV_DATA, generateId } from './constants';
 import { getSavedCVs, saveCVs, getWIPCV, saveWIPCV } from './services/cvStore';
-import { PDFDownloadLink, Font } from '@react-pdf/renderer';
+import { usePDF, Font } from '@react-pdf/renderer';
 import { PdfDocument } from './components/PdfDocument';
 
 const App: React.FC = () => {
     const { cvData, actions } = useCVData();
     const [style, setStyle] = useState<CVStyle>(DEFAULT_STYLE);
+    const [instance, updateInstance] = usePDF({ document: <PdfDocument cv={cvData} style={style} /> });
     const cvPreviewRef = useRef<HTMLDivElement>(null);
 
     const [savedCVs, setSavedCVs] = useState<SavedCV[]>([]);
@@ -54,6 +55,10 @@ const App: React.FC = () => {
 
         return () => clearTimeout(handler);
     }, [cvData, style, cvName, activeCVId, isInitialized]);
+
+    useEffect(() => {
+        updateInstance();
+    }, [cvData, style]);
 
     useEffect(() => {
         // Register fonts
@@ -314,6 +319,16 @@ const App: React.FC = () => {
         URL.revokeObjectURL(url);
     }, [cvName]);
 
+    const handleSavePdf = useCallback(() => {
+        if (instance.loading || !instance.blob) return;
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(instance.blob);
+        const safeName = cvName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        link.download = `${safeName || 'cv'}.pdf`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }, [instance.loading, instance.blob, cvName]);
+
     return (
         <>
             <div className="w-screen h-screen bg-gray-100 font-sans flex overflow-hidden">
@@ -332,17 +347,8 @@ const App: React.FC = () => {
                         onOpenManager={() => setIsManagerOpen(true)}
                         onExportJson={handleExportJson}
                         onImport={handleImport}
-                        pdfLink={
-                            <PDFDownloadLink
-                                document={<PdfDocument cv={cvData} style={style} />}
-                                fileName={`${cvName || 'cv'}.pdf`}
-                                className="bg-red-600 text-white font-semibold py-2 px-3 rounded-md hover:bg-red-700 transition-colors text-sm w-full my-2 text-center"
-                            >
-                                {({ blob, url, loading, error }) =>
-                                    loading ? 'Loading...' : 'Save to PDF'
-                                }
-                            </PDFDownloadLink>
-                        }
+                        onSavePdf={handleSavePdf}
+                        isPdfLoading={instance.loading}
                         onExportHtml={handleExportHtml}
                     />
                 </aside>

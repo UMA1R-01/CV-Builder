@@ -100,13 +100,14 @@ interface ControlPanelProps {
     setCvName: (name: string) => void;
     onSave: () => void;
     onOpenManager: () => void;
-    pdfLink: React.ReactNode;
+    onSavePdf: () => void;
+    isPdfLoading: boolean;
     onExportHtml: () => void;
     onExportJson: () => void;
     onImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const ControlPanel: React.FC<ControlPanelProps> = ({ cvData, actions, style, setStyle, cvName, setCvName, onSave, onOpenManager, pdfLink, onExportHtml, onExportJson, onImport }) => {
+const ControlPanel: React.FC<ControlPanelProps> = ({ cvData, actions, style, setStyle, cvName, setCvName, onSave, onOpenManager, onSavePdf, isPdfLoading, onExportHtml, onExportJson, onImport }) => {
     const [activeTab, setActiveTab] = useState<'content' | 'style'>('content');
     const [expandedSection, setExpandedSection] = useState<string | null>('personal');
     const [newSectionName, setNewSectionName] = useState('');
@@ -189,7 +190,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ cvData, actions, style, set
                             <div className="pt-2 border-t">
                                 <label className="block text-sm font-medium text-gray-700 my-1">Export / Import</label>
                                 <div className="flex justify-center w-full">
-                                    {pdfLink}
+                                    <button
+                                        onClick={onSavePdf}
+                                        disabled={isPdfLoading}
+                                        className="bg-red-600 text-white font-semibold py-2 px-3 rounded-md hover:bg-red-700 transition-colors text-sm w-full my-2 text-center disabled:bg-red-400"
+                                    >
+                                        {isPdfLoading ? 'Loading...' : 'Save to PDF'}
+                                    </button>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
                                     <button onClick={onExportHtml} className="bg-white text-gray-700 font-semibold py-2 px-3 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors text-sm">

@@ -1,8 +1,11 @@
 
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
-import { Parser, ProcessNodeDefinitions } from 'html-to-react';
 
+import { Parser } from 'html-to-react';
+import { processingInstructions } from './pdf/html-to-pdf';
+
+const htmlToReactParser = new Parser();
 
 const styles = StyleSheet.create({
   page: {
@@ -63,21 +66,6 @@ const styles = StyleSheet.create({
     margin: 2,
   },
 });
-
-const htmlToReactParser = new Parser();
-const processNodeDefinitions = new ProcessNodeDefinitions(React);
-const processingInstructions = [
-  {
-    shouldProcessNode: (node: any) => node.tagName === 'li',
-    processNode: (node: any, children: any) => {
-      return <Text>• {children}</Text>;
-    },
-  },
-  {
-    shouldProcessNode: () => true,
-    processNode: processNodeDefinitions.processDefaultNode,
-  },
-];
 
 export const PdfDocument = ({ cv, style }: any) => (
   <Document>
