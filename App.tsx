@@ -336,7 +336,7 @@ const App: React.FC = () => {
                             <PDFDownloadLink
                                 document={<PdfDocument cv={cvData} style={style} />}
                                 fileName={`${cvName || 'cv'}.pdf`}
-                                className="bg-red-600 text-white font-semibold py-2 px-3 rounded-md hover:bg-red-700 transition-colors text-sm"
+                                className="bg-red-600 text-white font-semibold py-2 px-3 rounded-md hover:bg-red-700 transition-colors text-sm w-full my-2 text-center"
                             >
                                 {({ blob, url, loading, error }) =>
                                     loading ? 'Loading...' : 'Save to PDF'

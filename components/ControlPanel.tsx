@@ -188,8 +188,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ cvData, actions, style, set
                             </div>
                             <div className="pt-2 border-t">
                                 <label className="block text-sm font-medium text-gray-700 my-1">Export / Import</label>
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="flex justify-center w-full">
                                     {pdfLink}
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
                                     <button onClick={onExportHtml} className="bg-white text-gray-700 font-semibold py-2 px-3 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors text-sm">
                                         Export as HTML
                                     </button>
