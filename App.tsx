@@ -114,8 +114,7 @@ Font.register({
 const App: React.FC = () => {
     const { cvData, actions } = useCVData();
     const [style, setStyle] = useState<CVStyle>(DEFAULT_STYLE);
-    const pdfDocument = useMemo(() => <PdfDocument cv={cvData} style={style} />, [cvData, style]);
-    const [instance, updateInstance] = usePDF({ document: pdfDocument });
+    const [instance, updateInstance] = usePDF({ document: useMemo(() => <PdfDocument cv={cvData} style={style} />, [cvData, style]) });
     const cvPreviewRef = useRef<HTMLDivElement>(null);
 
     const [savedCVs, setSavedCVs] = useState<SavedCV[]>([]);
