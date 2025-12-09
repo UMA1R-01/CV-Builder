@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useCVData } from './hooks/useCVData';
 import { CVData, CVStyle, SavedCV } from './types';
 import { CVPreview } from './components/CVPreview';
@@ -7,9 +7,28 @@ import ControlPanel from './components/ControlPanel';
 import { CVManager } from './components/CVManager';
 import { DEFAULT_STYLE, DEFAULT_CV_DATA, generateId } from './constants';
 import { getSavedCVs, saveCVs, getWIPCV, saveWIPCV } from './services/cvStore';
+import { usePDF, Font } from '@react-pdf/renderer';
+import PdfDocument from './components/pdf/PdfDocument';
+import { FONT_OPTIONS } from './constants';
 
-// Let TypeScript know that html2pdf exists on the window object
-declare const html2pdf: any;
+// Filter for Google Fonts and dynamically register them
+const GOOGLE_FONTS = ['Poppins', 'Roboto', 'Open Sans', 'Lato', 'Source Sans Pro'];
+const fontsToRegister = FONT_OPTIONS.filter(f => GOOGLE_FONTS.includes(f.name));
+
+fontsToRegister.forEach(font => {
+    const fontName = font.name;
+    const googleFontName = fontName.replace(/\s/g, '+');
+    // NOTE: This uses a simplified URL structure for Google Fonts.
+    // A more robust solution might need a mapping for specific font weights and styles.
+    Font.register({
+        family: fontName,
+        fonts: [
+            { src: `https://fonts.gstatic.com/s/${googleFontName.toLowerCase()}/v20/whatever.ttf`, fontWeight: 400 },
+            { src: `https://fonts.gstatic.com/s/${googleFontName.toLowerCase()}/v20/whatever.ttf`, fontWeight: 700 },
+            { src: `https://fonts.gstatic.com/s/${googleFontName.toLowerCase()}/v20/whatever.ttf`, fontStyle: 'italic' },
+        ]
+    });
+});
 
 const App: React.FC = () => {
     const { cvData, actions } = useCVData();
@@ -21,8 +40,12 @@ const App: React.FC = () => {
     const [cvName, setCvName] = useState('Untitled CV');
     const [isManagerOpen, setIsManagerOpen] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
-    const [isSavingPdf, setIsSavingPdf] = useState(false);
     
+    // PDF Generation
+    const memoizedPdfDocument = useMemo(() => <PdfDocument cvData={cvData} style={style} />, [cvData, style]);
+    const [instance] = usePDF({ document: memoizedPdfDocument });
+
+
     // Load from storage on initial render
     useEffect(() => {
         const wipCV = getWIPCV();
@@ -162,52 +185,6 @@ const App: React.FC = () => {
         event.target.value = ''; // Reset file input
     };
 
-    const handleSavePdf = useCallback(() => {
-        if (!cvPreviewRef.current || isSavingPdf) {
-            return;
-        }
-    
-        setIsSavingPdf(true);
-    
-        if (typeof html2pdf === 'undefined') {
-            alert("PDF generation library failed to load. Please try again later.");
-            console.error("html2pdf.js is not loaded.");
-            setIsSavingPdf(false);
-            return;
-        }
-    
-        const element = cvPreviewRef.current;
-        const safeName = (cvName || 'cv').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    
-        const elementToExport = element.cloneNode(true) as HTMLElement;
-        elementToExport.classList.remove('cv-page-shadow');
-
-        const opt = {
-          margin: 0,
-          filename: `${safeName}.pdf`,
-          image: { type: 'jpeg', quality: 0.95 },
-          html2canvas: { 
-              scale: 2,
-              useCORS: true,
-              logging: false,
-          },
-          jsPDF: { 
-              unit: 'in', 
-              format: 'a4', 
-              orientation: 'portrait' 
-          },
-          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
-    
-        html2pdf().from(elementToExport).set(opt).save()
-            .catch((err: any) => {
-                console.error("PDF Generation Error:", err);
-                alert("An error occurred while generating the PDF. It might be too large or complex. Please try again.");
-            })
-            .finally(() => {
-                setIsSavingPdf(false);
-            });
-    }, [cvName, isSavingPdf]);
 
     const handleExportHtml = useCallback(() => {
         if (!cvPreviewRef.current) return;
@@ -278,9 +255,9 @@ const App: React.FC = () => {
                         onOpenManager={() => setIsManagerOpen(true)}
                         onExportJson={handleExportJson}
                         onImport={handleImport}
-                        onSavePdf={handleSavePdf}
-                        isSavingPdf={isSavingPdf}
+                        isPdfLoading={instance.loading}
                         onExportHtml={handleExportHtml}
+                        instance={instance}
                     />
                 </aside>
             </div>

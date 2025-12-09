@@ -9,14 +9,24 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
       },
-      plugins: [react()],
+      plugins: [
+        react({
+          // Exclude pdf components from HMR
+          exclude: /components\/pdf\//,
+        })
+      ],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        'global': {},
       },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
+          'stream': 'stream-browserify',
+          'zlib': 'browserify-zlib',
+          'util': 'util',
+          'buffer': 'buffer',
         }
       }
     };

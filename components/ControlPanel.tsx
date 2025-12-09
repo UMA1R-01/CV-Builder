@@ -100,14 +100,14 @@ interface ControlPanelProps {
     setCvName: (name: string) => void;
     onSave: () => void;
     onOpenManager: () => void;
-    onSavePdf: () => void;
-    isSavingPdf: boolean;
+    isPdfLoading: boolean;
     onExportHtml: () => void;
     onExportJson: () => void;
     onImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    instance: any;
 }
 
-const ControlPanel: React.FC<ControlPanelProps> = ({ cvData, actions, style, setStyle, cvName, setCvName, onSave, onOpenManager, onSavePdf, isSavingPdf, onExportHtml, onExportJson, onImport }) => {
+const ControlPanel: React.FC<ControlPanelProps> = ({ cvData, actions, style, setStyle, cvName, setCvName, onSave, onOpenManager, isPdfLoading, onExportHtml, onExportJson, onImport, instance }) => {
     const [activeTab, setActiveTab] = useState<'content' | 'style'>('content');
     const [expandedSection, setExpandedSection] = useState<string | null>('personal');
     const [newSectionName, setNewSectionName] = useState('');
@@ -190,13 +190,15 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ cvData, actions, style, set
                             <div className="pt-2 border-t">
                                 <label className="block text-sm font-medium text-gray-700 my-1">Export / Import</label>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <button
-                                        onClick={onSavePdf}
-                                        disabled={isSavingPdf}
-                                        className="bg-red-600 text-white font-semibold py-2 px-3 rounded-md hover:bg-red-700 transition-colors text-sm disabled:bg-red-400 disabled:cursor-not-allowed"
+                                    <a
+                                        href={instance.url}
+                                        download={`${cvName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`}
+                                        className={`bg-red-600 text-white font-semibold py-2 px-3 rounded-md hover:bg-red-700 transition-colors text-sm ${instance.loading || !instance.url ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        onClick={(e) => { if (instance.loading || !instance.url) e.preventDefault(); }}
+                                        id="save-pdf-link"
                                     >
-                                        {isSavingPdf ? 'Saving...' : 'Save to PDF'}
-                                    </button>
+                                        {instance.loading ? 'Generating PDF...' : 'Save to PDF'}
+                                    </a>
                                     <button onClick={onExportHtml} className="bg-white text-gray-700 font-semibold py-2 px-3 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors text-sm">
                                         Export as HTML
                                     </button>
