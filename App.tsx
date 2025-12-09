@@ -5,11 +5,10 @@ import { CVData, CVStyle, SavedCV } from './types';
 import { CVPreview } from './components/CVPreview';
 import ControlPanel from './components/ControlPanel';
 import { CVManager } from './components/CVManager';
-import { DEFAULT_STYLE, DEFAULT_CV_DATA, generateId } from './constants';
+import { DEFAULT_STYLE, DEFAULT_CV_DATA, generateId, FONT_OPTIONS } from './constants';
 import { getSavedCVs, saveCVs, getWIPCV, saveWIPCV } from './services/cvStore';
 import { usePDF, Font } from '@react-pdf/renderer';
 import PdfDocument from './components/pdf/PdfDocument';
-import { FONT_OPTIONS } from './constants';
 
 // Filter for Google Fonts and dynamically register them
 const GOOGLE_FONTS = ['Poppins', 'Roboto', 'Open Sans', 'Lato', 'Source Sans Pro'];
@@ -185,6 +184,16 @@ const App: React.FC = () => {
         event.target.value = ''; // Reset file input
     };
 
+    const handleSavePdf = useCallback(() => {
+        if (instance.loading || !instance.url) {
+            return;
+        }
+        const link = document.createElement('a');
+        link.href = instance.url;
+        const safeName = (cvName || 'cv').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        link.download = `${safeName}.pdf`;
+        link.click();
+    }, [instance.loading, instance.url, cvName]);
 
     const handleExportHtml = useCallback(() => {
         if (!cvPreviewRef.current) return;
@@ -255,9 +264,9 @@ const App: React.FC = () => {
                         onOpenManager={() => setIsManagerOpen(true)}
                         onExportJson={handleExportJson}
                         onImport={handleImport}
+                        onSavePdf={handleSavePdf}
                         isPdfLoading={instance.loading}
                         onExportHtml={handleExportHtml}
-                        instance={instance}
                     />
                 </aside>
             </div>
