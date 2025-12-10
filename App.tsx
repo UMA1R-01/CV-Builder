@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useCVData } from './hooks/useCVData';
 import { CVData, CVStyle, SavedCV } from './types';
@@ -7,6 +6,7 @@ import ControlPanel from './components/ControlPanel';
 import { CVManager } from './components/CVManager';
 import { DEFAULT_STYLE, DEFAULT_CV_DATA, generateId } from './constants';
 import { getSavedCVs, saveCVs, getWIPCV, saveWIPCV } from './services/cvStore';
+import { PencilSquareIcon, EyeIcon } from './components/Icons';
 
 // Let TypeScript know that html2pdf exists on the window object
 declare const html2pdf: any;
@@ -22,13 +22,19 @@ const App: React.FC = () => {
     const [isManagerOpen, setIsManagerOpen] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
     const [isSavingPdf, setIsSavingPdf] = useState(false);
+
+    // Responsive State
+    const [activeMobileTab, setActiveMobileTab] = useState<'editor' | 'preview'>('editor');
+    const [previewScale, setPreviewScale] = useState(1);
+    const mainContainerRef = useRef<HTMLDivElement>(null);
     
     // Load from storage on initial render
     useEffect(() => {
         const wipCV = getWIPCV();
         if (wipCV) {
             actions.loadData(wipCV.data);
-            setStyle(wipCV.style);
+            // Merge with DEFAULT_STYLE to ensure new properties (like paperSize) are present
+            setStyle({ ...DEFAULT_STYLE, ...wipCV.style });
             setCvName(wipCV.name);
             setActiveCVId(wipCV.activeCVId);
         } else {
@@ -57,12 +63,52 @@ const App: React.FC = () => {
         return () => clearTimeout(handler);
     }, [cvData, style, cvName, activeCVId, isInitialized]);
 
+    // Scaling Logic for Preview
+    useEffect(() => {
+        const calculateScale = () => {
+            if (!mainContainerRef.current) return;
+            
+            const containerWidth = mainContainerRef.current.clientWidth;
+            // Increased padding on left to accommodate the sidebar ruler (approx 40px + some spacing)
+            // Mobile: 16px right + 60px left = 76px. Desktop: 32px right + 80px left = 112px
+            const xPadding = window.innerWidth < 1024 ? 76 : 112; 
+            const availableWidth = containerWidth - xPadding;
+            
+            const pageWidth = style.paperSize === 'Letter' ? 816 : 794;
+            
+            let newScale = availableWidth / pageWidth;
+            // Limit scale: Max 1 (don't zoom in beyond 100%), Min 0.3
+            newScale = Math.min(1, Math.max(0.3, newScale));
+            
+            setPreviewScale(newScale);
+        };
+
+        const resizeObserver = new ResizeObserver(() => {
+            calculateScale();
+        });
+
+        if (mainContainerRef.current) {
+            resizeObserver.observe(mainContainerRef.current);
+        }
+        
+        window.addEventListener('resize', calculateScale);
+        
+        // Initial calc
+        calculateScale();
+        
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', calculateScale);
+        }
+    }, [style.paperSize, activeMobileTab]);
+
 
     const handleLoadCV = (id: string, cvs: SavedCV[] = savedCVs, openManager = false) => {
         const cvToLoad = cvs.find(cv => cv.id === id);
         if (cvToLoad) {
             actions.loadData(cvToLoad.data);
-            setStyle(cvToLoad.style);
+            // Merge with DEFAULT_STYLE to ensure consistency
+            setStyle({ ...DEFAULT_STYLE, ...cvToLoad.style });
             setActiveCVId(cvToLoad.id);
             setCvName(cvToLoad.name);
             if (openManager) {
@@ -146,7 +192,7 @@ const App: React.FC = () => {
                 // Basic validation
                 if (parsed.name && parsed.data && parsed.style) {
                     actions.loadData(parsed.data);
-                    setStyle(parsed.style);
+                    setStyle({ ...DEFAULT_STYLE, ...parsed.style });
                     setCvName(parsed.name);
                     setActiveCVId(null); // Imported CV is unsaved
                     alert(`Successfully imported "${parsed.name}"`);
@@ -180,7 +226,30 @@ const App: React.FC = () => {
         const safeName = (cvName || 'cv').replace(/[^a-z0-9]/gi, '_').toLowerCase();
     
         const elementToExport = element.cloneNode(true) as HTMLElement;
-        elementToExport.classList.remove('cv-page-shadow');
+        
+        // Remove preview-only styles from the pages to ensure clean PDF generation
+        const pages = elementToExport.querySelectorAll('.cv-page');
+        pages.forEach((page: any) => {
+            page.classList.remove('cv-page-shadow');
+            page.classList.remove('mt-8'); // Remove vertical spacing between pages
+            page.style.marginBottom = '0'; 
+            page.style.boxShadow = 'none';
+        });
+
+        // Remove page break markers and rulers from PDF
+        elementToExport.querySelectorAll('.page-break-marker').forEach((el: any) => el.remove());
+        elementToExport.querySelectorAll('.cv-ruler').forEach((el: any) => el.remove());
+        
+        // Remove measurement container if present in clone
+        Array.from(elementToExport.children).forEach((child: any) => {
+            if (
+                child.style.visibility === 'hidden' || 
+                child.style.display === 'none' ||
+                (child.style.position === 'absolute' && child.style.zIndex === '-1000')
+            ) {
+                child.remove();
+            }
+        });
 
         const opt = {
           margin: 0,
@@ -212,7 +281,27 @@ const App: React.FC = () => {
     const handleExportHtml = useCallback(() => {
         if (!cvPreviewRef.current) return;
     
-        const cvHtml = cvPreviewRef.current.outerHTML;
+        const element = cvPreviewRef.current;
+        // Clone to remove markers without affecting UI
+        const clone = element.cloneNode(true) as HTMLElement;
+        
+        // Remove markers and rulers
+        clone.querySelectorAll('.page-break-marker').forEach((el: any) => el.remove());
+        clone.querySelectorAll('.cv-ruler').forEach((el: any) => el.remove());
+
+        // Remove the invisible measurement container
+        Array.from(clone.children).forEach((child: any) => {
+            if (
+                child.style.visibility === 'hidden' || 
+                child.style.display === 'none' ||
+                (child.style.position === 'absolute' && child.style.zIndex === '-1000')
+            ) {
+                child.remove();
+            }
+        });
+
+        const cvHtml = clone.innerHTML;
+
         const fontLinks = Array.from(document.head.querySelectorAll('link[href*="fonts.googleapis.com"]'))
             .map(link => link.outerHTML)
             .join('\n');
@@ -227,20 +316,59 @@ const App: React.FC = () => {
     <script src="https://cdn.tailwindcss.com"></script>
     ${fontLinks}
     <style>
+        /* Base page styling matching the preview */
         body {
-            background-color: #f7fafc;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 2rem;
+            background-color: #f3f4f6; /* Gray-100 */
+            margin: 0;
+            padding: 2rem 0;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
+        
+        /* Individual Page styling */
+        .cv-page {
+            background-color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            position: relative;
+            /* Ensure content rendering matches app */
+            display: block;
+            box-sizing: border-box;
+        }
+        
+        /* Typography helpers */
         .prose ul { list-style-type: disc; padding-left: 1.5rem; }
         .prose ol { list-style-type: decimal; padding-left: 1.5rem; }
         .prose li { margin-bottom: 0.25rem; }
         .prose a { text-decoration: underline; }
         .prose, .prose p, .prose ul, .prose ol, .prose li, .prose strong, .prose em, .prose b, .prose i, .prose u { color: inherit; }
-        .cv-page-shadow { box-shadow: 0 0 0.5cm rgba(0,0,0,0.2); }
+
+        /* Print Styles - Ensure exact pagination */
+        @media print {
+            @page { margin: 0; }
+            body {
+                background-color: white;
+                padding: 0;
+                display: block;
+            }
+            .cv-page {
+                box-shadow: none;
+                margin: 0;
+                width: 100% !important;
+                page-break-after: always;
+                break-after: page;
+                /* Prevent unintended scaling */
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            .cv-page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -262,11 +390,34 @@ const App: React.FC = () => {
 
     return (
         <>
-            <div className="w-screen h-screen bg-gray-100 font-sans flex overflow-hidden">
-                <main className="flex-grow h-full overflow-auto p-8 flex justify-center">
-                    <CVPreview ref={cvPreviewRef} cvData={cvData} style={style} />
+            <div className="w-full h-[100dvh] bg-gray-100 font-sans flex flex-col lg:flex-row overflow-hidden">
+                {/* Main Preview Area */}
+                <main 
+                    ref={mainContainerRef}
+                    className={`flex-grow h-full overflow-y-auto overflow-x-hidden bg-gray-100 flex flex-col items-center py-8 lg:py-8 lg:px-0 px-4 transition-all
+                        ${activeMobileTab === 'preview' ? 'block' : 'hidden lg:flex'}
+                    `}
+                >
+                    <div 
+                        style={{ 
+                            transform: `scale(${previewScale})`, 
+                            transformOrigin: 'top center',
+                        }}
+                        className="transition-transform duration-200 ease-out origin-top ml-8 lg:ml-0" // Add margin on mobile/desktop to ensure ruler isn't clipped by center alignment
+                    >
+                         <CVPreview ref={cvPreviewRef} cvData={cvData} style={style} />
+                    </div>
+                     {/* Bottom padding to allow scrolling past the scaled content */}
+                    <div className="w-full h-24 lg:h-12 flex-shrink-0"></div>
                 </main>
-                <aside className="w-[450px] flex-shrink-0 h-full">
+
+                 {/* Sidebar Controls */}
+                <aside 
+                    className={`
+                        w-full lg:w-[450px] flex-shrink-0 h-full border-l border-gray-200 bg-white z-10 overflow-hidden
+                        ${activeMobileTab === 'editor' ? 'block' : 'hidden lg:block'}
+                    `}
+                >
                     <ControlPanel 
                         cvData={cvData} 
                         actions={actions}
@@ -282,8 +433,29 @@ const App: React.FC = () => {
                         isSavingPdf={isSavingPdf}
                         onExportHtml={handleExportHtml}
                     />
+                     {/* Padding for mobile bottom nav */}
+                     <div className="lg:hidden h-16 w-full"></div>
                 </aside>
+
+                {/* Mobile Bottom Navigation */}
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 z-50 shadow-lg">
+                    <button 
+                        onClick={() => setActiveMobileTab('editor')}
+                        className={`flex flex-col items-center justify-center p-2 rounded-lg flex-1 transition-colors ${activeMobileTab === 'editor' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500 hover:bg-gray-50'}`}
+                    >
+                        <PencilSquareIcon className="w-6 h-6 mb-1" />
+                        <span className="text-xs font-medium">Editor</span>
+                    </button>
+                    <button 
+                         onClick={() => setActiveMobileTab('preview')}
+                        className={`flex flex-col items-center justify-center p-2 rounded-lg flex-1 transition-colors ${activeMobileTab === 'preview' ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500 hover:bg-gray-50'}`}
+                    >
+                        <EyeIcon className="w-6 h-6 mb-1" />
+                        <span className="text-xs font-medium">Preview</span>
+                    </button>
+                </div>
             </div>
+            
             <CVManager 
                 isOpen={isManagerOpen}
                 onClose={() => setIsManagerOpen(false)}

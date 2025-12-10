@@ -1,5 +1,5 @@
 import React from 'react';
-import { CVStyle, DateFormat } from '../types';
+import { CVStyle, DateFormat, PaperSize } from '../types';
 import { FONT_OPTIONS } from '../constants';
 
 interface StyleControlsProps {
@@ -114,6 +114,17 @@ const StyleControls: React.FC<StyleControlsProps> = ({ style, setStyle }) => {
             
             <fieldset className="space-y-4">
                 <legend className="text-lg font-semibold text-gray-900">Layout</legend>
+                 <div>
+                    <label className="block text-sm font-medium text-gray-700">Paper Size</label>
+                    <select
+                        value={style.paperSize || 'A4'}
+                        onChange={(e) => handleStyleChange('paperSize', e.target.value as PaperSize)}
+                        className={selectClassName}
+                    >
+                        <option value="A4">A4 (210mm x 297mm)</option>
+                        <option value="Letter">Letter (8.5in x 11in)</option>
+                    </select>
+                </div>
                  <div>
                     <label className="block text-sm font-medium text-gray-700">Margin</label>
                     <select

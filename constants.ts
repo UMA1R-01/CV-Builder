@@ -32,6 +32,7 @@ export const DEFAULT_STYLE: CVStyle = {
     personalInfoColumnGap: 2, // rem
     personalInfoRowGap: 0.5, // rem
     personalInfoLabelValueGap: 0.5, //rem
+    paperSize: 'A4',
 };
 
 export const DEFAULT_CV_DATA: CVData = {

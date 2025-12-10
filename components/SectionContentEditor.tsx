@@ -7,6 +7,28 @@ import { GripVerticalIcon, TrashIcon, ChevronDownIcon, PlusIcon, CopyIcon, EyeIc
 
 // --- Rich Text Editor Component ---
 
+interface ToolbarButtonProps {
+    cmd: string;
+    children: React.ReactNode;
+    title: string;
+    onExec: (cmd: string) => void;
+}
+
+const ToolbarButton: React.FC<ToolbarButtonProps> = ({ cmd, children, title, onExec }) => (
+    <button
+        type="button"
+        // Use onMouseDown to prevent the editor from losing focus and text selection.
+        onMouseDown={(e) => {
+            e.preventDefault();
+            onExec(cmd);
+        }}
+        className="p-2 rounded text-gray-400 hover:bg-gray-600 hover:text-white transition-colors"
+        title={title}
+    >
+        {children}
+    </button>
+);
+
 interface RichTextEditorProps {
     value: string;
     onChange: (newValue: string) => void;
@@ -42,28 +64,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
         }
     };
 
-    const ToolbarButton = ({ cmd, children, title }: { cmd: string; children: React.ReactNode; title: string; }) => (
-        <button
-            type="button"
-            // Use onMouseDown to prevent the editor from losing focus and text selection.
-            onMouseDown={(e) => {
-                e.preventDefault();
-                execCmd(cmd);
-            }}
-            className="p-2 rounded text-gray-400 hover:bg-gray-600 hover:text-white transition-colors"
-            title={title}
-        >
-            {children}
-        </button>
-    );
-
     return (
         <div className="border border-gray-500 rounded-md shadow-sm bg-gray-800 font-mono-code">
             <div className="toolbar flex items-center p-1 border-b border-gray-700">
-                <ToolbarButton cmd="bold" title="Bold"><BoldIcon className="w-4 h-4" /></ToolbarButton>
-                <ToolbarButton cmd="italic" title="Italic"><ItalicIcon className="w-4 h-4" /></ToolbarButton>
-                <ToolbarButton cmd="underline" title="Underline"><UnderlineIcon className="w-4 h-4" /></ToolbarButton>
-                <ToolbarButton cmd="insertUnorderedList" title="Bulleted List"><ListBulletIcon className="w-4 h-4" /></ToolbarButton>
+                <ToolbarButton cmd="bold" title="Bold" onExec={execCmd}><BoldIcon className="w-4 h-4" /></ToolbarButton>
+                <ToolbarButton cmd="italic" title="Italic" onExec={execCmd}><ItalicIcon className="w-4 h-4" /></ToolbarButton>
+                <ToolbarButton cmd="underline" title="Underline" onExec={execCmd}><UnderlineIcon className="w-4 h-4" /></ToolbarButton>
+                <ToolbarButton cmd="insertUnorderedList" title="Bulleted List" onExec={execCmd}><ListBulletIcon className="w-4 h-4" /></ToolbarButton>
             </div>
             <div
                 ref={editorRef}
@@ -91,6 +98,47 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
 
 
 // --- Main Section Editor Components ---
+
+export const SectionConfigurator: React.FC<{ section: CVSection; actions: ReturnType<typeof useCVData>['actions'] }> = ({ section, actions }) => {
+    const updateSection = (newValues: Partial<CVSection>) => {
+        actions.updateSection(section.id, newValues);
+    };
+
+    return (
+        <div className="flex items-center gap-2 w-full" onPointerDown={e => e.stopPropagation()}>
+            <input
+                type="text"
+                value={section.title}
+                onChange={(e) => updateSection({ title: e.target.value })}
+                className="flex-grow bg-transparent p-1.5 text-sm font-semibold text-gray-800 border border-transparent hover:border-gray-300 focus:border-indigo-500 focus:bg-white rounded transition-colors"
+                placeholder="Section Title"
+                title="Edit Section Title"
+            />
+             <div className="flex items-center text-gray-400">
+                 {/* Page Break */}
+                 <button
+                    onClick={() => updateSection({ pageBreakBefore: !section.pageBreakBefore })}
+                    className={`p-1.5 rounded transition-colors ${section.pageBreakBefore ? 'text-indigo-600 bg-indigo-50' : 'hover:bg-gray-200 hover:text-gray-700'}`}
+                    title={section.pageBreakBefore ? 'Remove page break before' : 'Move section to next page'}
+                >
+                    <PageBreakIcon className="w-4 h-4" />
+                </button>
+                 {/* Visible */}
+                <button onClick={() => updateSection({ visible: !section.visible })} className="p-1.5 hover:bg-gray-200 hover:text-gray-700 rounded transition-colors" title={section.visible ? 'Hide Section' : 'Show Section'}>
+                    {section.visible ? <EyeIcon className="w-4 h-4"/> : <EyeSlashIcon className="w-4 h-4"/>}
+                </button>
+                {/* Duplicate */}
+                <button onClick={() => actions.duplicateSection(section.id)} className="p-1.5 hover:bg-gray-200 hover:text-gray-700 rounded transition-colors" title="Duplicate Section">
+                    <CopyIcon className="w-4 h-4"/>
+                </button>
+                {/* Delete */}
+                <button onClick={() => actions.deleteSection(section.id)} className="p-1.5 hover:bg-red-100 hover:text-red-600 rounded transition-colors" title="Delete Section">
+                    <TrashIcon className="w-4 h-4"/>
+                </button>
+            </div>
+        </div>
+    );
+};
 
 interface ItemEditorProps {
     section: CVSection;
@@ -448,38 +496,6 @@ const SectionContentEditor: React.FC<SectionContentEditorProps> = ({ section, ac
 
     return (
         <div className="space-y-4">
-            <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Section Title</label>
-                <div className="flex items-center gap-2">
-                    <input
-                        type="text"
-                        value={section.title}
-                        onChange={(e) => updateSection({ title: e.target.value })}
-                        className="flex-grow p-2 block w-full text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                    <button
-                        onClick={() => updateSection({ pageBreakAfter: !section.pageBreakAfter })}
-                        className={`p-2 rounded-md transition-colors ${
-                            section.pageBreakAfter 
-                            ? 'bg-indigo-100 text-indigo-700' 
-                            : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'
-                        }`}
-                        title={section.pageBreakAfter ? 'Remove page break after' : 'Insert page break after'}
-                    >
-                        <PageBreakIcon className="w-5 h-5" />
-                    </button>
-                    <button onClick={() => updateSection({ visible: !section.visible })} className="p-2 text-gray-500 hover:text-gray-800" title={section.visible ? 'Hide Section' : 'Show Section'}>
-                        {section.visible ? <EyeIcon className="w-5 h-5"/> : <EyeSlashIcon className="w-5 h-5"/>}
-                    </button>
-                    <button onClick={() => actions.duplicateSection(section.id)} className="p-2 text-gray-500 hover:text-gray-800" title="Duplicate Section">
-                        <CopyIcon className="w-5 h-5"/>
-                    </button>
-                    <button onClick={() => actions.deleteSection(section.id)} className="p-2 text-red-500 hover:text-red-700" title="Delete Section">
-                        <TrashIcon className="w-5 h-5"/>
-                    </button>
-                </div>
-            </div>
-
             <div className="flex flex-wrap items-center justify-between gap-4 p-2 bg-gray-50 rounded-md">
                 <div className="flex items-center gap-2 text-sm">
                     {sortOptions.length > 0 && (

@@ -1,5 +1,3 @@
-
-
 import React, { useState, useRef } from 'react';
 import {
     DndContext,
@@ -17,10 +15,10 @@ import {
 } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { CVData, CVStyle, PersonalInfoItem } from '../types';
+import { CVData, CVStyle, PersonalInfoItem, CVSection } from '../types';
 import { useCVData } from '../hooks/useCVData';
 import StyleControls from './StyleControls';
-import SectionContentEditor from './SectionContentEditor';
+import SectionContentEditor, { SectionConfigurator } from './SectionContentEditor';
 import { GripVerticalIcon, ChevronDownIcon, PlusIcon, SaveIcon, TrashIcon } from './Icons';
 
 
@@ -63,31 +61,33 @@ const PersonalInfoItemEditor: React.FC<PersonalInfoItemEditorProps> = ({ item, o
 
 
 interface SectionHeaderProps {
-    id: string;
-    title: string;
+    section: CVSection;
+    actions: ReturnType<typeof useCVData>['actions'];
     isExpanded: boolean;
     onToggle: () => void;
 }
 
-const SectionHeader: React.FC<SectionHeaderProps> = ({ id, title, isExpanded, onToggle }) => {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+const SectionHeader: React.FC<SectionHeaderProps> = ({ section, actions, isExpanded, onToggle }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: section.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
 
     return (
-        <h3 ref={setNodeRef} style={style} className="w-full">
+        <div ref={setNodeRef} style={style} className="flex items-center p-2 bg-gray-100 border-b border-gray-200 gap-2 rounded-t-lg">
+             <button {...attributes} {...listeners} className="cursor-grab text-gray-400 hover:text-gray-600 p-1 flex-shrink-0 touch-none">
+                 <GripVerticalIcon className="w-5 h-5" />
+            </button>
+            
+            <div className="flex-grow min-w-0">
+                <SectionConfigurator section={section} actions={actions} />
+            </div>
+
             <button
                 onClick={onToggle}
-                className="w-full flex items-center justify-between p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                className="p-1 text-gray-500 hover:text-gray-800 hover:bg-gray-200 rounded flex-shrink-0"
             >
-                <div className="flex items-center">
-                    <span {...attributes} {...listeners} className="cursor-grab p-1 text-gray-500">
-                         <GripVerticalIcon className="w-5 h-5" />
-                    </span>
-                    <span className="font-semibold text-gray-800 ml-2">{title}</span>
-                </div>
-                <ChevronDownIcon className={`w-5 h-5 text-gray-600 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                <ChevronDownIcon className={`w-5 h-5 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
             </button>
-        </h3>
+        </div>
     );
 };
 
@@ -255,7 +255,12 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ cvData, actions, style, set
                             <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
                                 {cvData.sections.map(section => (
                                     <div key={section.id} className="bg-white border border-gray-200 rounded-lg">
-                                        <SectionHeader id={section.id} title={section.title} isExpanded={expandedSection === section.id} onToggle={() => setExpandedSection(expandedSection === section.id ? null : section.id)} />
+                                        <SectionHeader 
+                                            section={section} 
+                                            actions={actions}
+                                            isExpanded={expandedSection === section.id} 
+                                            onToggle={() => setExpandedSection(expandedSection === section.id ? null : section.id)} 
+                                        />
                                         {expandedSection === section.id && (
                                             <div className="p-3">
                                                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleItemDragEnd(section.id)}>

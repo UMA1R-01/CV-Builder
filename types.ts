@@ -97,7 +97,7 @@ export interface CVSection {
     layout?: 'list' | 'compact' | 'chips' | 'bullets' | 'bar' | 'dots' | 'pills';
     displayStyle?: 'multiline' | 'inline';
     visible: boolean;
-    pageBreakAfter?: boolean;
+    pageBreakBefore?: boolean;
 }
 
 export interface CVData {
@@ -107,6 +107,7 @@ export interface CVData {
 
 export type DateFormat = 'MM/YYYY' | 'Month YYYY' | 'YYYY';
 export type SortKey = 'startDate' | 'date' | 'skillName' | 'projectName' | 'degree' | 'jobTitle' | 'company' | 'name' | 'title' | 'language' | 'descriptionLength';
+export type PaperSize = 'A4' | 'Letter';
 
 export interface CVStyle {
     fontFamily: string;
@@ -124,6 +125,7 @@ export interface CVStyle {
     personalInfoColumnGap: number;
     personalInfoRowGap: number;
     personalInfoLabelValueGap: number;
+    paperSize: PaperSize;
 }
 
 export interface SavedCV {
