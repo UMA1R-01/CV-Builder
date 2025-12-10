@@ -5,29 +5,54 @@ import { CVData, CVStyle, SavedCV } from './types';
 import { CVPreview } from './components/CVPreview';
 import ControlPanel from './components/ControlPanel';
 import { CVManager } from './components/CVManager';
-import { DEFAULT_STYLE, DEFAULT_CV_DATA, generateId, FONT_OPTIONS } from './constants';
+import { DEFAULT_STYLE, DEFAULT_CV_DATA, generateId } from './constants';
 import { getSavedCVs, saveCVs, getWIPCV, saveWIPCV } from './services/cvStore';
 import { usePDF, Font } from '@react-pdf/renderer';
 import PdfDocument from './components/pdf/PdfDocument';
+import { FONT_OPTIONS } from './constants';
 
-// Filter for Google Fonts and dynamically register them
-const GOOGLE_FONTS = ['Poppins', 'Roboto', 'Open Sans', 'Lato', 'Source Sans Pro'];
-const fontsToRegister = FONT_OPTIONS.filter(f => GOOGLE_FONTS.includes(f.name));
-
-fontsToRegister.forEach(font => {
-    const fontName = font.name;
-    const googleFontName = fontName.replace(/\s/g, '+');
-    // NOTE: This uses a simplified URL structure for Google Fonts.
-    // A more robust solution might need a mapping for specific font weights and styles.
-    Font.register({
-        family: fontName,
-        fonts: [
-            { src: `https://fonts.gstatic.com/s/${googleFontName.toLowerCase()}/v20/whatever.ttf`, fontWeight: 400 },
-            { src: `https://fonts.gstatic.com/s/${googleFontName.toLowerCase()}/v20/whatever.ttf`, fontWeight: 700 },
-            { src: `https://fonts.gstatic.com/s/${googleFontName.toLowerCase()}/v20/whatever.ttf`, fontStyle: 'italic' },
-        ]
-    });
+// Correctly register all Google Fonts with their specific URLs
+Font.register({
+    family: 'Poppins',
+    fonts: [
+        { src: 'https://fonts.gstatic.com/s/poppins/v20/pxiEyp8kv8JHgFVrJJfecg.ttf', fontWeight: 400 },
+        { src: 'https://fonts.gstatic.com/s/poppins/v20/pxiGyp8kv8JHgFVrJJLucg.ttf', fontStyle: 'italic' },
+        { src: 'https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLCz7V1s.ttf', fontWeight: 700 },
+    ],
 });
+Font.register({
+    family: 'Roboto',
+    fonts: [
+        { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.ttf', fontWeight: 400 },
+        { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOjCnqEu92Fr1Mu51TzBic-.ttf', fontStyle: 'italic' },
+        { src: 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfBBc9.ttf', fontWeight: 700 },
+    ],
+});
+Font.register({
+    family: 'Open Sans',
+    fonts: [
+        { src: 'https://fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsjZ0B4.ttf', fontWeight: 400 },
+        { src: 'https://fonts.gstatic.com/s/opensans/v34/memQYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZ4WSfL4dVJWUgsjZ0B4.ttf', fontStyle: 'italic' },
+        { src: 'https://fonts.gstatic.com/s/opensans/v34/memSYaGs126MiZpBA-UvWbX2vVnXBbObj2OVZyOOSr4dVJWUgsg-1x4.ttf', fontWeight: 700 },
+    ],
+});
+Font.register({
+    family: 'Lato',
+    fonts: [
+        { src: 'https://fonts.gstatic.com/s/lato/v23/S6uyw4BMUTPHjx4wWw.ttf', fontWeight: 400 },
+        { src: 'https://fonts.gstatic.com/s/lato/v23/S6u8w4BMUTPHjxsAXC-v.ttf', fontStyle: 'italic' },
+        { src: 'https://fonts.gstatic.com/s/lato/v23/S6u9w4BMUTPHh6UVSwiPGQ.ttf', fontWeight: 700 },
+    ],
+});
+Font.register({
+    family: 'Source Sans Pro',
+    fonts: [
+        { src: 'https://fonts.gstatic.com/s/sourcesanspro/v21/6xK3dSBYKcSV-LCoeQqfX1RYOo3qOK7l.ttf', fontWeight: 400 },
+        { src: 'https://fonts.gstatic.com/s/sourcesanspro/v21/6xK1dSBYKcSV-LCoeQqfX1RYOo3qPZ7l.ttf', fontStyle: 'italic' },
+        { src: 'https://fonts.gstatic.com/s/sourcesanspro/v21/6xKydSBYKcSV-LCoeQqfX1RYOo3ig4vwmw.ttf', fontWeight: 700 },
+    ],
+});
+
 
 const App: React.FC = () => {
     const { cvData, actions } = useCVData();
