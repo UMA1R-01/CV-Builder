@@ -541,12 +541,18 @@ export const CVPreview = React.forwardRef<HTMLDivElement, CVPreviewProps>(({ cvD
 
     return (
         <div ref={ref}>
+            {/* Inject strict font styles to enforce consistency even with pasted content */}
+            <style>{`
+                .cv-page, .cv-page *, .cv-measurement-container, .cv-measurement-container * {
+                    font-family: ${style.fontFamily} !important;
+                }
+            `}</style>
+
             {/* Hidden Measurement Container */}
             <div 
                 ref={measureRef} 
                 style={{ 
                     ...widthStyle, 
-                    fontFamily: style.fontFamily,
                     fontSize: '1rem', 
                     position: 'absolute', 
                     visibility: 'hidden', 
@@ -557,7 +563,7 @@ export const CVPreview = React.forwardRef<HTMLDivElement, CVPreviewProps>(({ cvD
                     minHeight: '0'
                 }}
                 // Apply margin directly here so children have correct width context.
-                className={`${style.fontSize} ${style.lineHeight} ${style.margin}`}
+                className={`cv-measurement-container ${style.fontSize} ${style.lineHeight} ${style.margin}`}
             >
                 {/* Render children directly to ensure measureRef.children matches layout blocks */}
                 {generateRenderBlocks(true)}
@@ -569,7 +575,6 @@ export const CVPreview = React.forwardRef<HTMLDivElement, CVPreviewProps>(({ cvD
                     key={pageIndex}
                     className={`cv-page cv-page-shadow bg-white ${style.fontSize} ${style.lineHeight} ${style.margin} ${pageIndex > 0 ? 'mt-8' : ''}`}
                     style={{ 
-                        fontFamily: style.fontFamily, 
                         color: style.bodyTextColor,
                         ...widthStyle,
                         position: 'relative', // Ensure relative positioning for absolute markers

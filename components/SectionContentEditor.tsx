@@ -22,7 +22,7 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({ cmd, children, title, onE
             e.preventDefault();
             onExec(cmd);
         }}
-        className="p-2 rounded text-gray-400 hover:bg-gray-600 hover:text-white transition-colors"
+        className="p-2 rounded text-gray-600 hover:bg-gray-200 hover:text-gray-900 transition-colors"
         title={title}
     >
         {children}
@@ -33,15 +33,15 @@ interface RichTextEditorProps {
     value: string;
     onChange: (newValue: string) => void;
     placeholder?: string;
+    fontFamily?: string;
 }
 
-const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeholder }) => {
+const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeholder, fontFamily }) => {
     const editorRef = useRef<HTMLDivElement>(null);
+    // Unique ID for scoping CSS
+    const editorId = useRef(`rte-${Math.random().toString(36).substr(2, 9)}`).current;
 
     // This effect synchronizes the editor's content with the `value` prop.
-    // It's designed to prevent the cursor from jumping during user input by only
-    // updating the DOM when the `value` prop is truly different from the editor's
-    // current content. This handles cases like loading new data.
     useEffect(() => {
         if (editorRef.current && editorRef.current.innerHTML !== value) {
             editorRef.current.innerHTML = value;
@@ -49,8 +49,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
     }, [value]);
 
     const handleInput = useCallback((event: React.FormEvent<HTMLDivElement>) => {
-        // We call onChange to update the parent state with the new HTML content.
-        // The useEffect above will prevent a re-render from resetting the cursor.
         onChange(event.currentTarget.innerHTML);
     }, [onChange]);
     
@@ -58,39 +56,43 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
         if (editorRef.current) {
             editorRef.current.focus();
             document.execCommand(command, false);
-            // After executing a command, the innerHTML is changed, so we must
-            // notify the parent component to keep the state in sync.
             onChange(editorRef.current.innerHTML);
         }
     };
 
     return (
-        <div className="border border-gray-500 rounded-md shadow-sm bg-gray-800 font-mono-code">
-            <div className="toolbar flex items-center p-1 border-b border-gray-700">
+        <div className="border border-gray-300 rounded-md shadow-sm bg-white overflow-hidden">
+            <div className="toolbar flex items-center p-1 border-b border-gray-200 bg-gray-50">
                 <ToolbarButton cmd="bold" title="Bold" onExec={execCmd}><BoldIcon className="w-4 h-4" /></ToolbarButton>
                 <ToolbarButton cmd="italic" title="Italic" onExec={execCmd}><ItalicIcon className="w-4 h-4" /></ToolbarButton>
                 <ToolbarButton cmd="underline" title="Underline" onExec={execCmd}><UnderlineIcon className="w-4 h-4" /></ToolbarButton>
                 <ToolbarButton cmd="insertUnorderedList" title="Bulleted List" onExec={execCmd}><ListBulletIcon className="w-4 h-4" /></ToolbarButton>
             </div>
+            
+            {/* 
+                Inject styles to strictly enforce font family on all children (including pasted span/p tags).
+                Using !important ensures we override inline styles from copied text.
+            */}
+            <style>{`
+                #${editorId}, #${editorId} * {
+                    font-family: ${fontFamily || 'inherit'} !important;
+                }
+            `}</style>
+
             <div
+                id={editorId}
                 ref={editorRef}
                 contentEditable={true}
                 onInput={handleInput}
-                className="prose min-h-[120px] max-w-none w-full p-3 text-sm focus:outline-none resize-y overflow-auto"
-                // The `dangerouslySetInnerHTML` prop is intentionally omitted here.
-                // It was the root cause of the cursor jumping issue because it re-rendered
-                // the content on every keystroke. The `useEffect` hook above is now
-                // solely responsible for synchronizing the editor's content.
+                className="prose prose-sm min-h-[120px] max-w-none w-full p-3 text-sm focus:outline-none resize-y overflow-auto text-gray-900 bg-white"
                 aria-label="Description editor"
                 data-placeholder={placeholder}
                 style={{
-                    '--tw-prose-body': '#d1d5db', // gray-300
-                    '--tw-prose-bold': '#ffffff',
-                    '--tw-prose-bullets': '#9ca3af', // gray-400
-                    '--tw-prose-links': '#93c5fd', // blue-300
-                    '--tw-prose-headings': '#f9fafb', // gray-50
-                    color: '#d1d5db', // fallback text color
-                } as React.CSSProperties}
+                    lineHeight: '1.5',
+                    backgroundColor: '#ffffff',
+                    color: '#000000',
+                    fontFamily: fontFamily || 'inherit'
+                }}
             />
         </div>
     );
@@ -144,9 +146,10 @@ interface ItemEditorProps {
     section: CVSection;
     item: CVEntry;
     actions: ReturnType<typeof useCVData>['actions'];
+    fontFamily?: string;
 }
 
-const ItemEditor: React.FC<ItemEditorProps> = ({ section, item, actions }) => {
+const ItemEditor: React.FC<ItemEditorProps> = ({ section, item, actions, fontFamily }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
 
@@ -168,6 +171,7 @@ const ItemEditor: React.FC<ItemEditorProps> = ({ section, item, actions }) => {
                         value={value}
                         onChange={(newValue) => updateItem({ description: newValue })}
                         placeholder="Describe your role and achievements..."
+                        fontFamily={fontFamily}
                     />
                 </div>
             </>
@@ -452,9 +456,10 @@ interface SectionContentEditorProps {
     section: CVSection;
     actions: ReturnType<typeof useCVData>['actions'];
     itemIds: string[];
+    fontFamily?: string;
 }
 
-const SectionContentEditor: React.FC<SectionContentEditorProps> = ({ section, actions, itemIds }) => {
+const SectionContentEditor: React.FC<SectionContentEditorProps> = ({ section, actions, itemIds, fontFamily }) => {
     
     const updateSection = (newValues: Partial<CVSection>) => {
         actions.updateSection(section.id, newValues);
@@ -574,7 +579,7 @@ const SectionContentEditor: React.FC<SectionContentEditorProps> = ({ section, ac
             
             <div className="space-y-2">
                 {section.items.map((item) => (
-                    <ItemEditor key={item.id} section={section} item={item} actions={actions} />
+                    <ItemEditor key={item.id} section={section} item={item} actions={actions} fontFamily={fontFamily} />
                 ))}
             </div>
 
@@ -582,7 +587,7 @@ const SectionContentEditor: React.FC<SectionContentEditorProps> = ({ section, ac
                 onClick={() => actions.addItem(section.id)}
                 className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-dashed border-gray-300 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100"
             >
-                <PlusIcon className="w-4 h-4" /> Add new entry
+                <PlusIcon className="w-4 h-4" /> Add Item
             </button>
         </div>
     );

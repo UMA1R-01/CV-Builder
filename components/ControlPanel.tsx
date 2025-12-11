@@ -265,7 +265,12 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ cvData, actions, style, set
                                             <div className="p-3">
                                                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleItemDragEnd(section.id)}>
                                                     <SortableContext items={section.items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-                                                        <SectionContentEditor section={section} actions={actions} itemIds={section.items.map(i => i.id)} />
+                                                        <SectionContentEditor 
+                                                            section={section} 
+                                                            actions={actions} 
+                                                            itemIds={section.items.map(i => i.id)}
+                                                            fontFamily={style.fontFamily}
+                                                        />
                                                     </SortableContext>
                                                 </DndContext>
                                             </div>
