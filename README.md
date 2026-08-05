@@ -4,6 +4,20 @@ A CV/resume builder that runs entirely on your machine — as a desktop app or i
 
 ![CV Builder](docs/screenshot.png)
 
+## Download
+
+**[Download the latest Windows installer →](https://github.com/UMA1R-01/CV-Builder/releases/latest)**
+
+Grab `CV Builder_x.y.z_x64-setup.exe` from the release assets and run it. It installs to
+`%LOCALAPPDATA%\Programs\CV Builder` with Start Menu and desktop shortcuts, and registers an
+uninstaller.
+
+The installer is unsigned, so Windows SmartScreen will warn on first run — choose **More info →
+Run anyway**. It relies on the WebView2 runtime, which ships with Windows 10 and 11 already; on a
+machine without it, the installer offers to fetch it.
+
+Prefer to build it yourself? See [Getting started](#getting-started).
+
 ## Why
 
 Most online resume builders want an account, keep your employment history on their servers, and paywall the PDF export. This one has no backend at all: everything lives in `localStorage`, and every export is produced locally by your own machine.
