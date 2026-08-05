@@ -1,0 +1,165 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: "Fraunces", ui-serif, serif;
+  --font-sans: "Inter", ui-sans-serif, sans-serif;
+
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-signal: var(--signal);
+  --color-lime: var(--lime);
+  --color-slate: var(--slate);
+  --color-hairline: var(--hairline);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+:root {
+  /* ---- Ink & Signal palette ---- */
+  --ink: #111113;
+  --paper: #f6f3ec;
+  --signal: #ff4d2e;
+  --lime: #d6ff4d;
+  --slate: #6b6b76;
+  --hairline: #dedad0;
+
+  /* ---- shadcn semantic mapping onto the palette ---- */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--signal);
+  --primary-foreground: var(--ink);
+  --secondary: var(--ink);
+  --secondary-foreground: var(--paper);
+  --muted: #ece8de;
+  --muted-foreground: var(--slate);
+  --accent: var(--lime);
+  --accent-foreground: var(--ink);
+  --destructive: #c81e1e;
+  --destructive-foreground: #ffffff;
+  --border: var(--hairline);
+  --input: var(--hairline);
+  --ring: var(--signal);
+  --radius: 0.625rem;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  overscroll-behavior: none;
+}
+
+/*
+ * Applied to <html> while the editor/preview divider is being dragged. Forcing cursor + a
+ * blanket user-select:none on every element (not just the divider) is what makes the drag feel
+ * reliable: without it, a fast drag that momentarily crosses over text/buttons mid-page triggers
+ * native text selection instead of a clean resize — that selection-during-drag glitch is why an
+ * earlier version of this handle was pulled.
+ */
+.resizing-cols,
+.resizing-cols * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+/*
+ * Print isolation: `.print-hide` marks true app chrome (top bar, editor sidebar, mobile tab bar,
+ * the preview's own fit-mode toolbar) that has no business on paper — `display: none` removes it
+ * from layout entirely, unlike a `visibility: hidden` approach, which still reserves its space
+ * and would push the CV content down the page. `.cv-print-flow` marks every ancestor of
+ * `.cv-content` (the app root, the flex row, the preview column, the scroll container, and the
+ * scale wrapper) and strips whatever was constraining/clipping/scaling it on screen (fixed
+ * viewport height, overflow-auto, the fit-to-container transform's sizing wrapper) so the full
+ * multi-page stack sits in ordinary block flow — exactly what the browser's print engine needs
+ * to paginate it across as many physical pages as the content requires. An earlier version
+ * instead hid everything via `visibility: hidden` and pulled `.cv-content` out with
+ * `position: fixed`, which pins an element to a single viewport-sized box — that's why only the
+ * first page printed. Printing the live document directly (no hidden iframe, no detached clone)
+ * also sidesteps ad-blocker extensions that commonly strip off-screen "hidden iframe" elements —
+ * the pattern a prior PDF-export implementation relied on and which silently broke the export
+ * for some users.
+ */
+@media print {
+  .print-hide {
+    display: none !important;
+  }
+  .cv-print-flow {
+    display: block !important;
+    height: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  .cv-content {
+    transform: none !important;
+  }
+  .cv-measure,
+  .cv-page-gap {
+    display: none !important;
+  }
+  .cv-page {
+    box-shadow: none !important;
+    border: none !important;
+    /*
+     * No margin override needed here: the inter-page gap is a dedicated .cv-page-gap sibling
+     * element (hidden above), not a margin on .cv-page itself. margin-bottom right before a
+     * forced page-break is a classic source of spurious blank pages in print engines — trailing
+     * margin doesn't reliably collapse away across a break the way it does in normal flow — so
+     * the gap is deliberately kept out of the page box's own margin entirely rather than relying
+     * on overriding it away for print.
+     *
+     * Only the modern `break-after` is set here, deliberately NOT paired with the legacy
+     * `page-break-after` alias: setting both was producing a spurious blank page after every
+     * real page (2 real pages printed as 4) — some engines evaluate the pair as two independent
+     * break instructions rather than treating the legacy property as a pure alias.
+     */
+    break-after: page;
+  }
+  .cv-page:last-child {
+    break-after: auto;
+  }
+}
