@@ -161,7 +161,10 @@ interface ImportedCV {
 function parseImportedCV(text: string): ImportedCV {
   let parsed: { name?: unknown; data?: unknown; style?: unknown } | null
   try {
-    parsed = JSON.parse(text)
+    // Windows editors (Notepad, PowerShell's Set-Content) prepend a UTF-8 BOM on save.
+    // JSON.parse chokes on it, which surfaced as a misleading "file may be corrupted"
+    // error on files that were otherwise perfectly valid.
+    parsed = JSON.parse(text.replace(/^\uFEFF/, ''))
   } catch {
     throw new Error('Invalid CV file.')
   }

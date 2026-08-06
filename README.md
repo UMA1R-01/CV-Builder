@@ -27,11 +27,29 @@ Most online resume builders want an account, keep your employment history on the
 - **Live paginated preview** — content is measured and packed into real A4/Letter pages as you type, so what you see is what prints. Sections can be forced onto a new page.
 - **Drag-and-drop everything** — reorder sections, entries within a section, and personal-info fields.
 - **Seven section types** — work experience, education, skills, projects, certifications, languages, and free-form custom sections, each with its own fields and sort rules.
-- **Four layout presets** — `classic`, `minimal`, `compactAts`, `boldSerif`. All deliberately single-column, since multi-column resumes parse unreliably in ATS software.
+- **Four layout presets** — all deliberately single-column, since multi-column resumes parse unreliably in ATS software.
 - **Deep styling** — 16 font families, size and line-height scales, heading/body colours, margins, section spacing, header alignment, personal-info column grid, and date formatting.
 - **Real vector PDF** — rendered through the browser/WebView print engine rather than rasterised, so text stays sharp and selectable at any zoom.
 - **Multiple saved CVs** — keep several versions side by side, with autosave of work in progress.
 - **Import/export** — portable JSON for backup, standalone HTML with styles inlined.
+
+### Four layouts, one click apart
+
+Every preset restyles the whole document — borders, casing, weight, and spacing — without touching your content or its reading order.
+
+![Layout presets: Classic, Minimal, Compact ATS, Bold Serif](docs/layouts.png)
+
+### Pagination that matches the print output
+
+Blocks are measured after they render, then packed into pages. Nothing is ever split mid-entry, so a job or a degree never straddles a page break.
+
+![A two-page CV showing where the page break falls](docs/pagination.png)
+
+### Style controls, applied live
+
+Layout, typography, colour, spacing and date format all update the preview as you change them.
+
+![The Style tab, showing layout presets, typography and colour controls](docs/styling.png)
 
 ## Desktop vs. browser
 
