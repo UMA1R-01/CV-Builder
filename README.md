@@ -1,6 +1,8 @@
 # CV Builder
 
-A CV/resume builder that runs entirely on your machine — as a desktop app or in the browser. Build a resume, restyle it live, and export it to PDF, HTML, or JSON. No account, no server, no data leaving your computer.
+A CV/resume builder that runs entirely on your machine, as a desktop app or in the browser. Build a resume, restyle it live, and export it to PDF, HTML, or JSON. No account, no server, no data leaving your computer.
+
+[![Leave a tip](https://img.shields.io/badge/☕-Leave_a_tip-ff69b4?style=for-the-badge)](#-leave-a-tip)
 
 ![CV Builder](docs/screenshot.png)
 
@@ -12,7 +14,7 @@ Grab `CV Builder_x.y.z_x64-setup.exe` from the release assets and run it. It ins
 `%LOCALAPPDATA%\Programs\CV Builder` with Start Menu and desktop shortcuts, and registers an
 uninstaller.
 
-The installer is unsigned, so Windows SmartScreen will warn on first run — choose **More info →
+The installer is unsigned, so Windows SmartScreen will warn on first run. Choose **More info →
 Run anyway**. It relies on the WebView2 runtime, which ships with Windows 10 and 11 already; on a
 machine without it, the installer offers to fetch it.
 
@@ -24,18 +26,18 @@ Most online resume builders want an account, keep your employment history on the
 
 ## Features
 
-- **Live paginated preview** — content is measured and packed into real A4/Letter pages as you type, so what you see is what prints. Sections can be forced onto a new page.
-- **Drag-and-drop everything** — reorder sections, entries within a section, and personal-info fields.
-- **Seven section types** — work experience, education, skills, projects, certifications, languages, and free-form custom sections, each with its own fields and sort rules.
-- **Four layout presets** — all deliberately single-column, since multi-column resumes parse unreliably in ATS software.
-- **Deep styling** — 16 font families, size and line-height scales, heading/body colours, margins, section spacing, header alignment, personal-info column grid, and date formatting.
-- **Real vector PDF** — rendered through the browser/WebView print engine rather than rasterised, so text stays sharp and selectable at any zoom.
-- **Multiple saved CVs** — keep several versions side by side, with autosave of work in progress.
-- **Import/export** — portable JSON for backup, standalone HTML with styles inlined.
+- **Live paginated preview**: content is measured and packed into real A4/Letter pages as you type, so what you see is what prints. Sections can be forced onto a new page.
+- **Drag-and-drop everything**: reorder sections, entries within a section, and personal-info fields.
+- **Seven section types**: work experience, education, skills, projects, certifications, languages, and free-form custom sections, each with its own fields and sort rules.
+- **Four layout presets**: all deliberately single-column, since multi-column resumes parse unreliably in ATS software.
+- **Deep styling**: 16 font families, size and line-height scales, heading/body colours, margins, section spacing, header alignment, personal-info column grid, and date formatting.
+- **Real vector PDF**: rendered through the browser/WebView print engine rather than rasterised, so text stays sharp and selectable at any zoom.
+- **Multiple saved CVs**: keep several versions side by side, with autosave of work in progress.
+- **Import/export**: portable JSON for backup, standalone HTML with styles inlined.
 
 ### Four layouts, one click apart
 
-Every preset restyles the whole document — borders, casing, weight, and spacing — without touching your content or its reading order.
+Every preset restyles the whole document (borders, casing, weight, and spacing) without touching your content or its reading order.
 
 ![Layout presets: Classic, Minimal, Compact ATS, Bold Serif](docs/layouts.png)
 
@@ -57,7 +59,7 @@ The same codebase ships both ways. The desktop build adds native OS integration 
 
 | | Desktop (Tauri) | Browser |
 | --- | --- | --- |
-| Save as PDF | Native save dialog, writes the PDF directly — no headers/footers to switch off | System print dialog, set destination to "Save as PDF" |
+| Save as PDF | Native save dialog, writes the PDF directly, no headers or footers to switch off | System print dialog, set destination to "Save as PDF" |
 | Export HTML/JSON | Native save dialog, you choose the location | Downloads folder |
 | Import JSON | Native file picker | `<input type="file">` |
 | Window | Frameless, app header doubles as the title bar | Normal browser tab |
@@ -69,7 +71,7 @@ The frontend detects which environment it is in at runtime, so the browser build
 
 - **[React 19](https://react.dev)** + **[TypeScript](https://www.typescriptlang.org)**
 - **[Vite 8](https://vite.dev)** for dev server and bundling
-- **[Tailwind CSS v4](https://tailwindcss.com)** — configured CSS-first, no `tailwind.config.js`
+- **[Tailwind CSS v4](https://tailwindcss.com)**: configured CSS-first, no `tailwind.config.js`
 - **[shadcn/ui](https://ui.shadcn.com)** on **[Radix UI](https://www.radix-ui.com)** primitives
 - **[@dnd-kit](https://dndkit.com)** for drag-and-drop
 - **[lucide-react](https://lucide.dev)** for icons
@@ -86,7 +88,7 @@ The **desktop** build additionally needs the [Tauri v2 prerequisites](https://ta
 
 - [Rust](https://rustup.rs) (stable, MSVC toolchain)
 - Microsoft C++ Build Tools, including the Windows SDK
-- WebView2 Runtime — preinstalled on Windows 10/11
+- WebView2 Runtime, preinstalled on Windows 10/11
 
 ### Install
 
@@ -152,6 +154,34 @@ The desktop icon is generated from a single source SVG:
 
 ```bash
 npx tauri icon src-tauri/app-icon.svg
+```
+
+## ☕ Leave a tip
+
+💛 If you like this app, a tip is always welcome!
+
+| | |
+|:--|:--|
+| <img src="https://img.shields.io/badge/Bitcoin-F7931A?style=flat-square&logo=bitcoin&logoColor=white" height="28" alt="Bitcoin"> | Native BTC only |
+| <img src="https://img.shields.io/badge/Base-0052FF?style=flat-square&logo=coinbase&logoColor=white" height="28" alt="Base"> | ETH / USDC on Base only |
+| <img src="https://img.shields.io/badge/Solana-9945FF?style=flat-square&logo=solana&logoColor=white" height="28" alt="Solana"> | SOL / SPL tokens only |
+
+<img src="https://img.shields.io/badge/Bitcoin-F7931A?style=flat-square&logo=bitcoin&logoColor=white" height="20" alt="Bitcoin" align="middle"> **Bitcoin**
+
+```
+bc1qs25pegh3232q9j58kt5dgczymcj4pg8a5un2zp
+```
+
+<img src="https://img.shields.io/badge/Base-0052FF?style=flat-square&logo=coinbase&logoColor=white" height="20" alt="Base" align="middle"> **Base**
+
+```
+0x81F29C9Dca41cb57395BE5b56c7606653A8c2E34
+```
+
+<img src="https://img.shields.io/badge/Solana-9945FF?style=flat-square&logo=solana&logoColor=white" height="20" alt="Solana" align="middle"> **Solana**
+
+```
+G57VrGCbAFWSe2vPfx2ZrUUxzJeiARncKUkYMxw3wKVa
 ```
 
 ## License
