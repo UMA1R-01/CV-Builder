@@ -160,19 +160,19 @@ npx tauri icon src-tauri/app-icon.svg
 
 💛 If you like this app, a tip is always welcome!
 
-<img src="https://img.shields.io/badge/Bitcoin-F7931A?style=flat-square&logo=bitcoin&logoColor=white" height="20" alt="Bitcoin" align="middle"> **Bitcoin** (native BTC only)
+<img src="https://img.shields.io/badge/Bitcoin-native%20BTC%20only-555?style=flat-square&logo=bitcoin&logoColor=white&labelColor=F7931A" alt="Bitcoin: native BTC only">
 
 ```
 bc1qs25pegh3232q9j58kt5dgczymcj4pg8a5un2zp
 ```
 
-<img src="https://img.shields.io/badge/Base-0052FF?style=flat-square&logo=coinbase&logoColor=white" height="20" alt="Base" align="middle"> **Base** (ETH / USDC on Base only)
+<img src="https://img.shields.io/badge/Base-ETH%20%2F%20USDC%20on%20Base%20only-555?style=flat-square&logo=coinbase&logoColor=white&labelColor=0052FF" alt="Base: ETH / USDC on Base only">
 
 ```
 0x81F29C9Dca41cb57395BE5b56c7606653A8c2E34
 ```
 
-<img src="https://img.shields.io/badge/Solana-9945FF?style=flat-square&logo=solana&logoColor=white" height="20" alt="Solana" align="middle"> **Solana** (SOL / SPL tokens only)
+<img src="https://img.shields.io/badge/Solana-SOL%20%2F%20SPL%20tokens%20only-555?style=flat-square&logo=solana&logoColor=white&labelColor=9945FF" alt="Solana: SOL / SPL tokens only">
 
 ```
 G57VrGCbAFWSe2vPfx2ZrUUxzJeiARncKUkYMxw3wKVa
